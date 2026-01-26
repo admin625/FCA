@@ -1048,21 +1048,20 @@
                         Upload 5-20 photos. Tag them for specific instructors or leave untagged for general studio use.
                     </div>
                     
-                    <!-- Prefer Own Photos Toggle -->
-                    <div class="toggle-group" style="margin-top: 20px;">
-                        <div>
-                            <div class="toggle-label">Prefer My Own Photos</div>
-                            <div class="toggle-description">
-                                <strong>ON:</strong> Use your uploaded photos when available, generate AI images only when needed<br>
-                                <strong>OFF:</strong> Always generate AI images (ignore uploaded photos)
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="preferOwnPhotos" id="preferOwnPhotos" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
+                   <!-- Prefer Own Photos Toggle -->
+<div class="toggle-group" style="margin-top: 20px;">
+    <div>
+        <div class="toggle-label">Only Use My Own Photos</div>
+        <div class="toggle-description">
+            <strong>ON:</strong> Only use my uploaded photos. Never generate AI images, even if no photo matches.<br>
+            <strong>OFF:</strong> Use my photos when available, but generate AI images when no matching photo is found.
+        </div>
+    </div>
+    <label class="toggle-switch">
+        <input type="checkbox" name="preferOwnPhotos" id="preferOwnPhotos" checked>
+        <span class="toggle-slider"></span>
+    </label>
+</div>
                 
                 <!-- SECTION 4: PLATFORMS -->
                 <div class="section-header">Social Media Platforms & Post Settings</div>
