@@ -1138,8 +1138,8 @@
                 uploadedPhotos.push({
                     file: file,
                     dataUrl: event.target.result,
-                    taggedInstructors: [], // Empty by default
-                    keywords: '' // Empty by default
+                    taggedInstructors: [],
+                    keywords: '' // NEW: keywords field
                 });
                 renderPhotoPreview();
             };
@@ -1165,7 +1165,7 @@
                     <button type="button" class="photo-remove-btn" onclick="removePhoto(${photoIndex})">×</button>
                 </div>
                 
-                <!-- Keywords Input -->
+                <!-- NEW: Keywords Input -->
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">
                         Keywords (optional):
@@ -1218,6 +1218,7 @@
         }
     };
 
+    // NEW: Update photo keywords function
     window.updatePhotoKeywords = function(photoIndex, keywords) {
         uploadedPhotos[photoIndex].keywords = keywords.trim();
     };
@@ -1346,7 +1347,7 @@
                             .from('studio-photos')
                             .getPublicUrl(fileName);
                         
-                        // Insert into studio_photos table with per-photo tags AND keywords
+                        // Insert into studio_photos table with keywords
                         await supabaseClient
                             .from('studio_photos')
                             .insert({
@@ -1354,14 +1355,14 @@
                                 storage_path: fileName,
                                 storage_url: urlData.publicUrl,
                                 instructor_emails: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
-                                keywords: photo.keywords || null,
+                                keywords: photo.keywords || null, // NEW: keywords
                                 uploaded_by: userTierData.email
                             });
                         
                         photoResults.push({
                             url: urlData.publicUrl,
                             tagged_instructors: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
-                            keywords: photo.keywords || null
+                            keywords: photo.keywords || null // NEW: keywords
                         });
                         
                     } else if (userTierData.role === 'regular_client' || userTierData.role === 'trial_user') {
@@ -1380,7 +1381,7 @@
                         photoResults.push({
                             url: urlData.publicUrl,
                             tagged_instructors: null,
-                            keywords: photo.keywords || null
+                            keywords: photo.keywords || null // NEW: keywords
                         });
                     }
                 } catch (error) {
@@ -1391,7 +1392,7 @@
             photoData = {
                 type: userTierData.role === 'studio_owner' ? 'studio_photos' : 'client_images',
                 studio_id: userTierData.studio_id || null,
-                photos: photoResults // Array of {url, tagged_instructors, keywords}
+                photos: photoResults
             };
         }
 
