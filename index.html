@@ -1215,9 +1215,45 @@
                     
                     <div id="photo-preview-grid" class="photo-preview-grid"></div>
                     
-                    <div class="helper-text" style="margin-top: 15px;">
-                        Upload 5-20 photos. Add keywords and tag them for specific instructors.
-                    </div>
+<div class="helper-text" style="margin-top: 15px;">
+    Upload 5-20 photos. Add keywords and tag them for specific instructors.
+</div>
+
+<!-- NEW: Save to Library Button -->
+<button 
+    type="button" 
+    id="save-photos-btn" 
+    style="
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: all 0.3s ease;
+        display: none;
+    "
+    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.4)';" 
+    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+    💾 Save Photos to Library
+</button>
+
+<div id="save-photos-success" style="
+    display: none;
+    background: #f0fdf4;
+    border: 2px solid #10b981;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    text-align: center;
+    color: #047857;
+    font-size: 14px;
+    font-weight: 600;
+"></div>
                     
                     <div class="toggle-group" style="margin-top: 20px;">
                         <div>
@@ -1783,6 +1819,13 @@
                 `;
             }).join('');
         }
+        // Show/hide save button based on uploaded photos
+const savePhotosBtn = document.getElementById('save-photos-btn');
+if (uploadedPhotos.length > 0) {
+    savePhotosBtn.style.display = 'block';
+} else {
+    savePhotosBtn.style.display = 'none';
+}
 
         window.togglePhotoForPlatform = function(photoId, platform, isChecked) {
             const photo = searchedPhotos.find(p => p.id === photoId);
@@ -2377,6 +2420,106 @@
             uploadedPhotos.splice(index, 1);
             renderPhotoPreview();
         };
+        // Save photos to library handler
+document.getElementById('save-photos-btn').addEventListener('click', async function() {
+    if (!userTierData) {
+        alert('Please verify your email first');
+        return;
+    }
+
+    if (uploadedPhotos.length === 0) {
+        alert('No photos to save');
+        return;
+    }
+
+    // Disable button and show loading
+    const saveBtn = document.getElementById('save-photos-btn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Saving photos...';
+    
+    document.getElementById('loading-overlay').classList.add('show');
+
+    try {
+        const photoResults = [];
+        
+        for (const photo of uploadedPhotos) {
+            if (userTierData.role === 'studio_owner') {
+                // Studio Owner: Upload to studio-photos bucket
+                const fileName = `studio-${userTierData.studio_id}/${Date.now()}-${photo.file.name}`;
+                const { data, error } = await supabaseClient.storage
+                    .from('studio-photos')
+                    .upload(fileName, photo.file);
+                
+                if (error) throw error;
+                
+                const { data: urlData } = supabaseClient.storage
+                    .from('studio-photos')
+                    .getPublicUrl(fileName);
+                
+                // Insert into studio_photos table
+                await supabaseClient
+                    .from('studio_photos')
+                    .insert({
+                        studio_id: userTierData.studio_id,
+                        storage_path: fileName,
+                        storage_url: urlData.publicUrl,
+                        instructor_emails: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
+                        keywords: photo.keywords || null,
+                        uploaded_by: userTierData.email
+                    });
+                
+                photoResults.push({
+                    url: urlData.publicUrl,
+                    keywords: photo.keywords || '',
+                    instructors: photo.taggedInstructors
+                });
+                
+            } else if (userTierData.role === 'regular_client' || userTierData.role === 'trial_user') {
+                // Regular client or trial: Upload to client-photos bucket
+                const fileName = `${userTierData.email}/${Date.now()}-${photo.file.name}`;
+                const { data, error } = await supabaseClient.storage
+                    .from('client-photos')
+                    .upload(fileName, photo.file);
+                
+                if (error) throw error;
+                
+                const { data: urlData } = supabaseClient.storage
+                    .from('client-photos')
+                    .getPublicUrl(fileName);
+                
+                photoResults.push({
+                    url: urlData.publicUrl,
+                    keywords: photo.keywords || ''
+                });
+            }
+        }
+        
+        // Success!
+        const successMsg = document.getElementById('save-photos-success');
+        successMsg.textContent = `✅ ${photoResults.length} photo${photoResults.length === 1 ? '' : 's'} saved to library!`;
+        successMsg.style.display = 'block';
+        
+        // Clear uploaded photos
+        uploadedPhotos = [];
+        renderPhotoPreview();
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+        }, 5000);
+        
+    } catch (error) {
+        console.error('Photo save error:', error);
+        alert('Error saving photos: ' + error.message);
+        
+        // Re-enable button on error
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+    } finally {
+        document.getElementById('loading-overlay').classList.remove('show');
+    }
+});
 
         document.querySelectorAll('.number-selector').forEach(selector => {
             const buttons = selector.querySelectorAll('.number-btn');
