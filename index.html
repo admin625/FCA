@@ -426,6 +426,194 @@
             font-size: 12px;
             color: #1e293b;
         }
+
+        .photo-search-section {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .photo-search-section h3 {
+            color: #0369a1;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .photo-search-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .photo-search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .photo-search-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .photo-search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+
+        .photo-search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .photo-search-results {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .photo-search-results.show {
+            display: block;
+        }
+
+        .photo-search-results-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+
+        .photo-search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .photo-search-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .photo-search-card.selected {
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+
+        .photo-search-image {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .photo-search-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-search-tags {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .photo-search-platforms {
+            margin-bottom: 10px;
+        }
+
+        .photo-search-platforms-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .photo-search-platform-checks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .photo-search-platform-check {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+        }
+
+        .photo-search-platform-check input {
+            width: 14px;
+            height: 14px;
+            margin-right: 4px;
+            cursor: pointer;
+            accent-color: #0ea5e9;
+        }
+
+        .photo-search-posts {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .photo-search-posts.show {
+            display: block;
+        }
+
+        .photo-search-posts-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .photo-search-post-checks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .photo-search-post-check {
+            display: flex;
+            align-items: center;
+            font-size: 10px;
+            background: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .photo-search-post-check input {
+            width: 12px;
+            height: 12px;
+            margin-right: 4px;
+            cursor: pointer;
+            accent-color: #0ea5e9;
+        }
+
+        .photo-search-no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
         
         .number-selector {
             display: flex;
@@ -780,6 +968,10 @@
             .photo-preview-grid {
                 grid-template-columns: 1fr;
             }
+
+            .photo-search-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1040,6 +1232,32 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                    
+                    <div class="photo-search-section" id="photo-search-section" style="display: none;">
+                        <h3>🔍 Search Your Photo Library</h3>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                            Search for photos by instructor name or keywords (e.g., "headshot sara", "yoga poses", "HIIT class")
+                        </p>
+                        <div class="photo-search-input-group">
+                            <input 
+                                type="text" 
+                                id="photo-search-input" 
+                                class="photo-search-input"
+                                placeholder="Search by instructor name or keywords..."
+                            >
+                            <button type="button" id="photo-search-btn" class="photo-search-btn">
+                                Search Photos
+                            </button>
+                        </div>
+                        
+                        <div class="photo-search-results" id="photo-search-results">
+                            <div class="photo-search-results-header" id="photo-search-results-header"></div>
+                            <div class="photo-search-grid" id="photo-search-grid"></div>
+                            <div class="photo-search-no-results" id="photo-search-no-results" style="display: none;">
+                                No photos found matching your search. Try different keywords or upload more photos.
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="section-header">Social Media Platforms & Post Settings</div>
@@ -1240,7 +1458,6 @@
         let studioInstructors = [];
         
         const getStorageKey = (email) => `fca_form_data_${email}`;
-        
         function saveFormData(email) {
             if (!email) return;
             
@@ -1424,6 +1641,226 @@
             }
         }
 
+        let searchedPhotos = [];
+        let selectedPhotos = [];
+
+        const photoSearchSection = document.getElementById('photo-search-section');
+        const photoSearchBtn = document.getElementById('photo-search-btn');
+        const photoSearchInput = document.getElementById('photo-search-input');
+        const photoSearchResults = document.getElementById('photo-search-results');
+        const photoSearchGrid = document.getElementById('photo-search-grid');
+        const photoSearchResultsHeader = document.getElementById('photo-search-results-header');
+        const photoSearchNoResults = document.getElementById('photo-search-no-results');
+
+        function showPhotoSearchSection() {
+            if (userTierData && (userTierData.role === 'studio_owner' || userTierData.tier === 'pro' || userTierData.tier === 'premium' || userTierData.tier === 'trial')) {
+                photoSearchSection.style.display = 'block';
+            }
+        }
+
+        photoSearchBtn.addEventListener('click', async function() {
+            const searchQuery = photoSearchInput.value.trim().toLowerCase();
+            
+            if (!searchQuery) {
+                alert('Please enter search keywords');
+                return;
+            }
+
+            if (!userTierData) {
+                alert('Please verify your email first');
+                return;
+            }
+
+            photoSearchBtn.disabled = true;
+            photoSearchBtn.textContent = 'Searching...';
+
+            try {
+                let photos = [];
+
+                if (userTierData.role === 'studio_owner') {
+                    const { data, error } = await supabaseClient
+                        .from('studio_photos')
+                        .select('*')
+                        .eq('studio_id', userTierData.studio_id);
+
+                    if (error) throw error;
+                    photos = data || [];
+                } else {
+                    photos = [];
+                }
+
+                const searchTerms = searchQuery.split(/[\s,]+/).filter(t => t.length > 0);
+                
+                searchedPhotos = photos.filter(photo => {
+                    const keywords = (photo.keywords || '').toLowerCase();
+                    const instructorEmails = photo.instructor_emails || [];
+                    
+                    return searchTerms.some(term => {
+                        return keywords.includes(term) || 
+                               instructorEmails.some(email => email.toLowerCase().includes(term));
+                    });
+                });
+
+                renderPhotoSearchResults();
+
+            } catch (error) {
+                console.error('Photo search error:', error);
+                alert('Error searching photos: ' + error.message);
+            } finally {
+                photoSearchBtn.disabled = false;
+                photoSearchBtn.textContent = 'Search Photos';
+            }
+        });
+
+        function renderPhotoSearchResults() {
+            photoSearchResults.classList.add('show');
+
+            if (searchedPhotos.length === 0) {
+                photoSearchGrid.style.display = 'none';
+                photoSearchNoResults.style.display = 'block';
+                photoSearchResultsHeader.textContent = '';
+                return;
+            }
+
+            photoSearchGrid.style.display = 'grid';
+            photoSearchNoResults.style.display = 'none';
+            photoSearchResultsHeader.textContent = `Found ${searchedPhotos.length} photo${searchedPhotos.length === 1 ? '' : 's'}`;
+
+            photoSearchGrid.innerHTML = searchedPhotos.map((photo, index) => {
+                const photoId = photo.id;
+                const isSelected = selectedPhotos.some(p => p.photo_id === photoId);
+
+                const keywords = photo.keywords || '';
+                const instructorEmails = photo.instructor_emails || [];
+                const tags = [...keywords.split(',').map(k => k.trim()).filter(k => k), ...instructorEmails].join(', ');
+
+                return `
+                    <div class="photo-search-card ${isSelected ? 'selected' : ''}" id="search-photo-${photoId}">
+                        <div class="photo-search-image">
+                            <img src="${photo.storage_url}" alt="Photo ${index + 1}">
+                        </div>
+                        <div class="photo-search-tags">Tags: ${tags || 'No tags'}</div>
+                        
+                        <div class="photo-search-platforms">
+                            <label class="photo-search-platforms-label">Use on platforms:</label>
+                            <div class="photo-search-platform-checks">
+                                <label class="photo-search-platform-check">
+                                    <input type="checkbox" value="instagram" onchange="togglePhotoForPlatform('${photoId}', 'instagram', this.checked)">
+                                    📸 IG
+                                </label>
+                                <label class="photo-search-platform-check">
+                                    <input type="checkbox" value="facebook" onchange="togglePhotoForPlatform('${photoId}', 'facebook', this.checked)">
+                                    👥 FB
+                                </label>
+                                <label class="photo-search-platform-check">
+                                    <input type="checkbox" value="linkedin" onchange="togglePhotoForPlatform('${photoId}', 'linkedin', this.checked)">
+                                    💼 LI
+                                </label>
+                                <label class="photo-search-platform-check">
+                                    <input type="checkbox" value="twitter" onchange="togglePhotoForPlatform('${photoId}', 'twitter', this.checked)">
+                                    𝕏 X
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="photo-search-posts" id="search-photo-${photoId}-instagram-posts">
+                            <label class="photo-search-posts-label">Instagram posts:</label>
+                            <div class="photo-search-post-checks" id="search-photo-${photoId}-instagram-posts-checks"></div>
+                        </div>
+                        <div class="photo-search-posts" id="search-photo-${photoId}-facebook-posts">
+                            <label class="photo-search-posts-label">Facebook posts:</label>
+                            <div class="photo-search-post-checks" id="search-photo-${photoId}-facebook-posts-checks"></div>
+                        </div>
+                        <div class="photo-search-posts" id="search-photo-${photoId}-linkedin-posts">
+                            <label class="photo-search-posts-label">LinkedIn posts:</label>
+                            <div class="photo-search-post-checks" id="search-photo-${photoId}-linkedin-posts-checks"></div>
+                        </div>
+                        <div class="photo-search-posts" id="search-photo-${photoId}-twitter-posts">
+                            <label class="photo-search-posts-label">Twitter posts:</label>
+                            <div class="photo-search-post-checks" id="search-photo-${photoId}-twitter-posts-checks"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.togglePhotoForPlatform = function(photoId, platform, isChecked) {
+            const photo = searchedPhotos.find(p => p.id === photoId);
+            if (!photo) return;
+
+            const postSection = document.getElementById(`search-photo-${photoId}-${platform}-posts`);
+            const postChecksContainer = document.getElementById(`search-photo-${photoId}-${platform}-posts-checks`);
+
+            if (isChecked) {
+                postSection.classList.add('show');
+
+                const postCount = parseInt(document.querySelector(`[name="${platform}_posts"]`)?.value || 0);
+
+                const postCheckboxes = [];
+                for (let i = 1; i <= postCount; i++) {
+                    postCheckboxes.push(`
+                        <label class="photo-search-post-check">
+                            <input type="checkbox" value="${i}" onchange="togglePhotoForPost('${photoId}', '${platform}', ${i}, this.checked)">
+                            #${i}
+                        </label>
+                    `);
+                }
+                postChecksContainer.innerHTML = postCheckboxes.join('');
+
+                let selectedPhoto = selectedPhotos.find(p => p.photo_id === photoId);
+                if (!selectedPhoto) {
+                    selectedPhoto = {
+                        photo_id: photoId,
+                        photo_url: photo.storage_url,
+                        platforms: {}
+                    };
+                    selectedPhotos.push(selectedPhoto);
+                }
+
+                if (!selectedPhoto.platforms[platform]) {
+                    selectedPhoto.platforms[platform] = [];
+                }
+
+            } else {
+                postSection.classList.remove('show');
+
+                const selectedPhoto = selectedPhotos.find(p => p.photo_id === photoId);
+                if (selectedPhoto) {
+                    delete selectedPhoto.platforms[platform];
+
+                    if (Object.keys(selectedPhoto.platforms).length === 0) {
+                        selectedPhotos = selectedPhotos.filter(p => p.photo_id !== photoId);
+                        document.getElementById(`search-photo-${photoId}`).classList.remove('selected');
+                    }
+                }
+            }
+        };
+
+        window.togglePhotoForPost = function(photoId, platform, postNumber, isChecked) {
+            const selectedPhoto = selectedPhotos.find(p => p.photo_id === photoId);
+            if (!selectedPhoto) return;
+
+            if (!selectedPhoto.platforms[platform]) {
+                selectedPhoto.platforms[platform] = [];
+            }
+
+            if (isChecked) {
+                if (!selectedPhoto.platforms[platform].includes(postNumber)) {
+                    selectedPhoto.platforms[platform].push(postNumber);
+                }
+            } else {
+                selectedPhoto.platforms[platform] = selectedPhoto.platforms[platform].filter(p => p !== postNumber);
+            }
+
+            const hasAnySelection = Object.values(selectedPhoto.platforms).some(posts => posts.length > 0);
+            const card = document.getElementById(`search-photo-${photoId}`);
+            if (hasAnySelection) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        };
+
         document.getElementById('clear-data-btn').addEventListener('click', function() {
             if (!userTierData || !userTierData.email) {
                 alert('No email detected');
@@ -1507,7 +1944,6 @@
                 verifyEmailBtn.click();
             }
         });
-
         async function checkUserTier(email) {
             let role = 'regular_client';
             let tierData = {};
@@ -1577,6 +2013,7 @@
                 
                 mainForm.style.display = 'block';
                 enableAutoSave(email);
+                showPhotoSearchSection();
                 return;
             }
 
@@ -1642,6 +2079,7 @@
                 mainForm.style.display = 'block';
                 
                 enableAutoSave(email);
+                showPhotoSearchSection();
                 return;
             }
 
@@ -1682,6 +2120,7 @@
                 mainForm.style.display = 'block';
                 
                 enableAutoSave(email);
+                showPhotoSearchSection();
                 return;
             }
 
@@ -1726,6 +2165,7 @@
                 instructorManagement.classList.remove('show');
                 mainForm.style.display = 'block';
                 enableAutoSave(email);
+                showPhotoSearchSection();
                 return;
             }
 
@@ -2128,7 +2568,8 @@
                 social_profile: formData.get('social_profile') || '',
                 platforms: platformsArray,
                 preferOwnPhotos: document.getElementById('preferOwnPhotos')?.checked ?? true,
-                photo_data: photoData
+                photo_data: photoData,
+                selected_photos: selectedPhotos
             };
             
             document.getElementById('loading-overlay').classList.add('show');
