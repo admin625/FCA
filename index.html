@@ -1819,14 +1819,7 @@
                 `;
             }).join('');
         }
-        // Show/hide save button based on uploaded photos
-const savePhotosBtn = document.getElementById('save-photos-btn');
-if (uploadedPhotos.length > 0) {
-    savePhotosBtn.style.display = 'block';
-} else {
-    savePhotosBtn.style.display = 'none';
-}
-
+       
         window.togglePhotoForPlatform = function(photoId, platform, isChecked) {
             const photo = searchedPhotos.find(p => p.id === photoId);
             if (!photo) return;
