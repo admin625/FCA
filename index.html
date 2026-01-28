@@ -1209,7 +1209,7 @@
                         <div id="upload-prompt">
                             <p style="font-size: 18px; margin-bottom: 10px;">📸 Upload Your Photos</p>
                             <p style="font-size: 14px; color: #64748b;">Click to select photos or drag & drop</p>
-                            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Accepted: JPG, PNG (max 25MB each)</p>
+                           <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Accepted: JPG, PNG, HEIC, WebP (max 50MB each)</p>
                         </div>
                     </div>
                     
@@ -2316,8 +2316,8 @@
         photoInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             files.forEach(file => {
-                if (file.size > 25 * 1024 * 1024) {
-                    alert(`${file.name} is too large (max 25MB)`);
+                if (file.size > 50 * 1024 * 1024) {
+                    alert(`${file.name} is too large (max 50MB)`);
                     return;
                 }
                 
