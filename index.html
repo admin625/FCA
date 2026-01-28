@@ -1209,51 +1209,51 @@
                         <div id="upload-prompt">
                             <p style="font-size: 18px; margin-bottom: 10px;">📸 Upload Your Photos</p>
                             <p style="font-size: 14px; color: #64748b;">Click to select photos or drag & drop</p>
-                           <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Accepted: JPG, PNG, HEIC, WebP (max 50MB each)</p>
+                            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Accepted: JPG, PNG, HEIC, WebP (max 50MB each)</p>
                         </div>
                     </div>
                     
                     <div id="photo-preview-grid" class="photo-preview-grid"></div>
                     
-<div class="helper-text" style="margin-top: 15px;">
-    Upload 5-20 photos. Add keywords and tag them for specific instructors.
-</div>
+                    <div class="helper-text" style="margin-top: 15px;">
+                        Upload 5-20 photos. Add keywords like "headshot alex" or "yoga sara" for easy searching.
+                    </div>
 
-<!-- NEW: Save to Library Button -->
-<button 
-    type="button" 
-    id="save-photos-btn" 
-    style="
-        width: 100%;
-        padding: 14px;
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 15px;
-        transition: all 0.3s ease;
-        display: none;
-    "
-    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.4)';" 
-    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-    💾 Save Photos to Library
-</button>
+                    <!-- Save to Library Button -->
+                    <button 
+                        type="button" 
+                        id="save-photos-btn" 
+                        style="
+                            width: 100%;
+                            padding: 14px;
+                            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+                            color: white;
+                            border: none;
+                            border-radius: 10px;
+                            font-size: 15px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            margin-top: 15px;
+                            transition: all 0.3s ease;
+                            display: none;
+                        "
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.4)';" 
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        💾 Save Photos to Library
+                    </button>
 
-<div id="save-photos-success" style="
-    display: none;
-    background: #f0fdf4;
-    border: 2px solid #10b981;
-    border-radius: 8px;
-    padding: 12px;
-    margin-top: 10px;
-    text-align: center;
-    color: #047857;
-    font-size: 14px;
-    font-weight: 600;
-"></div>
+                    <div id="save-photos-success" style="
+                        display: none;
+                        background: #f0fdf4;
+                        border: 2px solid #10b981;
+                        border-radius: 8px;
+                        padding: 12px;
+                        margin-top: 10px;
+                        text-align: center;
+                        color: #047857;
+                        font-size: 14px;
+                        font-weight: 600;
+                    "></div>
                     
                     <div class="toggle-group" style="margin-top: 20px;">
                         <div>
@@ -1272,14 +1272,14 @@
                     <div class="photo-search-section" id="photo-search-section" style="display: none;">
                         <h3>🔍 Search Your Photo Library</h3>
                         <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
-                            Search for photos by instructor name or keywords (e.g., "headshot sara", "yoga poses", "HIIT class")
+                            Search for photos by keywords (e.g., "headshot sara", "yoga poses", "HIIT class")
                         </p>
                         <div class="photo-search-input-group">
                             <input 
                                 type="text" 
                                 id="photo-search-input" 
                                 class="photo-search-input"
-                                placeholder="Search by instructor name or keywords..."
+                                placeholder="Search by keywords..."
                             >
                             <button type="button" id="photo-search-btn" class="photo-search-btn">
                                 Search Photos
@@ -1416,7 +1416,7 @@
                                     <div class="number-btn" data-value="2">2</div>
                                     <div class="number-btn" data-value="3">3</div>
                                     <div class="number-btn" data-value="4">4</div>
-                                    <div class="number-btn selected" data-value="5">5</div>
+                                    <div class="number-btn" selected" data-value="5">5</div>
                                 </div>
                                 <input type="hidden" name="twitter_posts" value="5">
                             </div>
@@ -1714,6 +1714,7 @@
                 let photos = [];
 
                 if (userTierData.role === 'studio_owner') {
+                    // FIXED: Query using correct column name
                     const { data, error } = await supabaseClient
                         .from('studio_photos')
                         .select('*')
@@ -1727,13 +1728,23 @@
 
                 const searchTerms = searchQuery.split(/[\s,]+/).filter(t => t.length > 0);
                 
+                // FIXED: Search in keywords field and tags JSONB array
                 searchedPhotos = photos.filter(photo => {
                     const keywords = (photo.keywords || '').toLowerCase();
-                    const instructorEmails = photo.instructor_emails || [];
+                    const tags = photo.tags || []; // tags is a JSONB array
                     
                     return searchTerms.some(term => {
-                        return keywords.includes(term) || 
-                               instructorEmails.some(email => email.toLowerCase().includes(term));
+                        // Search in keywords
+                        if (keywords.includes(term)) return true;
+                        
+                        // Search in tags array (instructor emails)
+                        if (Array.isArray(tags)) {
+                            return tags.some(tag => 
+                                typeof tag === 'string' && tag.toLowerCase().includes(term)
+                            );
+                        }
+                        
+                        return false;
                     });
                 });
 
@@ -1767,15 +1778,15 @@
                 const isSelected = selectedPhotos.some(p => p.photo_id === photoId);
 
                 const keywords = photo.keywords || '';
-                const instructorEmails = photo.instructor_emails || [];
-                const tags = [...keywords.split(',').map(k => k.trim()).filter(k => k), ...instructorEmails].join(', ');
+                const tags = photo.tags || []; // JSONB array
+                const allTags = [...keywords.split(',').map(k => k.trim()).filter(k => k), ...tags].join(', ');
 
                 return `
                     <div class="photo-search-card ${isSelected ? 'selected' : ''}" id="search-photo-${photoId}">
                         <div class="photo-search-image">
-                            <img src="${photo.storage_url}" alt="Photo ${index + 1}">
+                            <img src="${photo.photo_url}" alt="Photo ${index + 1}">
                         </div>
-                        <div class="photo-search-tags">Tags: ${tags || 'No tags'}</div>
+                        <div class="photo-search-tags">Tags: ${allTags || 'No tags'}</div>
                         
                         <div class="photo-search-platforms">
                             <label class="photo-search-platforms-label">Use on platforms:</label>
@@ -1847,7 +1858,7 @@
                 if (!selectedPhoto) {
                     selectedPhoto = {
                         photo_id: photoId,
-                        photo_url: photo.storage_url,
+                        photo_url: photo.photo_url, // FIXED: Use photo_url
                         platforms: {}
                     };
                     selectedPhotos.push(selectedPhoto);
@@ -2339,10 +2350,12 @@
             if (uploadedPhotos.length === 0) {
                 document.getElementById('upload-prompt').style.display = 'block';
                 photoPreviewGrid.innerHTML = '';
+                document.getElementById('save-photos-btn').style.display = 'none';
                 return;
             }
 
             document.getElementById('upload-prompt').style.display = 'none';
+            document.getElementById('save-photos-btn').style.display = 'block';
             
             const isStudioOwner = userTierData && userTierData.role === 'studio_owner';
             
@@ -2355,24 +2368,24 @@
                     
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">
-                            Keywords (optional):
+                            Keywords:
                         </label>
                         <input 
                             type="text" 
                             id="photo-${photoIndex}-keywords"
-                            placeholder="yoga, HIIT, headshot, etc."
+                            placeholder="headshot alex, yoga, HIIT"
                             value="${photo.keywords || ''}"
                             onchange="updatePhotoKeywords(${photoIndex}, this.value)"
                             style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;"
                         >
                         <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                            Separate with commas
+                            Use natural language like "headshot alex"
                         </div>
                     </div>
                     
                     ${isStudioOwner && studioInstructors.length > 0 ? `
                         <div class="photo-tags">
-                            <label class="photo-tags-label">Tag for instructors:</label>
+                            <label class="photo-tags-label">Tag for instructors (optional):</label>
                             <div class="photo-instructor-checkboxes">
                                 ${studioInstructors.map((instructor, instructorIndex) => `
                                     <div class="photo-instructor-checkbox">
@@ -2391,16 +2404,6 @@
                     ` : ''}
                 </div>
             `).join('');
-        
-         // Show/hide save button based on uploaded photos
-            const savePhotosBtn = document.getElementById('save-photos-btn');
-            if (savePhotosBtn) {
-                if (uploadedPhotos.length > 0) {
-                    savePhotosBtn.style.display = 'block';
-                } else {
-                    savePhotosBtn.style.display = 'none';
-                }
-            }
         }
         
         window.updatePhotoTag = function(photoIndex, instructorEmail, isChecked) {
@@ -2423,106 +2426,114 @@
             uploadedPhotos.splice(index, 1);
             renderPhotoPreview();
         };
-        // Save photos to library handler
+
+        // FIXED: Save photos to library with correct schema
         document.getElementById('save-photos-btn').addEventListener('click', async function() {
-    if (!userTierData) {
-        alert('Please verify your email first');
-        return;
-    }
-
-    if (uploadedPhotos.length === 0) {
-        alert('No photos to save');
-        return;
-    }
-
-    // Disable button and show loading
-    const saveBtn = document.getElementById('save-photos-btn');
-    const originalText = saveBtn.textContent;
-    saveBtn.disabled = true;
-    saveBtn.textContent = '⏳ Saving photos...';
-    
-    document.getElementById('loading-overlay').classList.add('show');
-
-    try {
-        const photoResults = [];
-        
-        for (const photo of uploadedPhotos) {
-            if (userTierData.role === 'studio_owner') {
-                // Studio Owner: Upload to studio-photos bucket
-                const fileName = `studio-${userTierData.studio_id}/${Date.now()}-${photo.file.name}`;
-                const { data, error } = await supabaseClient.storage
-                    .from('studio-photos')
-                    .upload(fileName, photo.file);
-                
-                if (error) throw error;
-                
-                const { data: urlData } = supabaseClient.storage
-                    .from('studio-photos')
-                    .getPublicUrl(fileName);
-                
-                // Insert into studio_photos table
-                await supabaseClient
-                    .from('studio_photos')
-                    .insert({
-                        studio_id: userTierData.studio_id,
-                        storage_path: fileName,
-                        storage_url: urlData.publicUrl,
-                        instructor_emails: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
-                        keywords: photo.keywords || null,
-                        uploaded_by: userTierData.email
-                    });
-                
-                photoResults.push({
-                    url: urlData.publicUrl,
-                    keywords: photo.keywords || '',
-                    instructors: photo.taggedInstructors
-                });
-                
-            } else if (userTierData.role === 'regular_client' || userTierData.role === 'trial_user') {
-                // Regular client or trial: Upload to client-photos bucket
-                const fileName = `${userTierData.email}/${Date.now()}-${photo.file.name}`;
-                const { data, error } = await supabaseClient.storage
-                    .from('client-photos')
-                    .upload(fileName, photo.file);
-                
-                if (error) throw error;
-                
-                const { data: urlData } = supabaseClient.storage
-                    .from('client-photos')
-                    .getPublicUrl(fileName);
-                
-                photoResults.push({
-                    url: urlData.publicUrl,
-                    keywords: photo.keywords || ''
-                });
+            if (!userTierData) {
+                alert('Please verify your email first');
+                return;
             }
-        }
-        
-        // Success!
-        const successMsg = document.getElementById('save-photos-success');
-        successMsg.textContent = `✅ ${photoResults.length} photo${photoResults.length === 1 ? '' : 's'} saved to library!`;
-        successMsg.style.display = 'block';
-        
-        // Clear uploaded photos
-        uploadedPhotos = [];
-        renderPhotoPreview();
-        
-        // Hide success message after 5 seconds
-        setTimeout(() => {
-            successMsg.style.display = 'none';
-        }, 5000);
-        
-    } catch (error) {
-        console.error('Photo save error:', error);
-        alert('Error saving photos: ' + error.message);
-        
-        // Re-enable button on error
-        saveBtn.disabled = false;
-        saveBtn.textContent = originalText;
-    } finally {
-        document.getElementById('loading-overlay').classList.remove('show');
-    }
-});
+
+            if (uploadedPhotos.length === 0) {
+                alert('No photos to save');
+                return;
+            }
+
+            const saveBtn = document.getElementById('save-photos-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Saving photos...';
+            
+            document.getElementById('loading-overlay').classList.add('show');
+
+            try {
+                const photoResults = [];
+                
+                for (const photo of uploadedPhotos) {
+                    if (userTierData.role === 'studio_owner') {
+                        // Upload to studio-photos bucket
+                        const fileName = `studio-${userTierData.studio_id}/${Date.now()}-${photo.file.name}`;
+                        const { data, error } = await supabaseClient.storage
+                            .from('studio-photos')
+                            .upload(fileName, photo.file);
+                        
+                        if (error) throw error;
+                        
+                        const { data: urlData } = supabaseClient.storage
+                            .from('studio-photos')
+                            .getPublicUrl(fileName);
+                        
+                        // FIXED: Insert with correct schema columns
+                        const { error: insertError } = await supabaseClient
+                            .from('studio_photos')
+                            .insert({
+                                studio_id: userTierData.studio_id,
+                                photo_url: urlData.publicUrl,
+                                file_name: photo.file.name,
+                                file_size: photo.file.size,
+                                tags: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
+                                keywords: photo.keywords || null,
+                                uploaded_by: userTierData.email,
+                                is_active: true
+                            });
+                        
+                        if (insertError) throw insertError;
+                        
+                        photoResults.push({
+                            url: urlData.publicUrl,
+                            keywords: photo.keywords || '',
+                            instructors: photo.taggedInstructors
+                        });
+                        
+                    } else if (userTierData.role === 'regular_client' || userTierData.role === 'trial_user') {
+                        // Upload to client-photos bucket
+                        const fileName = `${userTierData.email}/${Date.now()}-${photo.file.name}`;
+                        const { data, error } = await supabaseClient.storage
+                            .from('client-photos')
+                            .upload(fileName, photo.file);
+                        
+                        if (error) throw error;
+                        
+                        const { data: urlData } = supabaseClient.storage
+                            .from('client-photos')
+                            .getPublicUrl(fileName);
+                        
+                        photoResults.push({
+                            url: urlData.publicUrl,
+                            keywords: photo.keywords || ''
+                        });
+                    }
+                }
+                
+                // Success!
+                const successMsg = document.getElementById('save-photos-success');
+                successMsg.textContent = `✅ ${photoResults.length} photo${photoResults.length === 1 ? '' : 's'} saved to library!`;
+                successMsg.style.display = 'block';
+                
+                // Clear uploaded photos
+                uploadedPhotos = [];
+                renderPhotoPreview();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 5000);
+                
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                
+            } catch (error) {
+                console.error('Photo save error:', error);
+                alert('Error saving photos: ' + error.message);
+                
+                // Re-enable button on error
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            } finally {
+                document.getElementById('loading-overlay').classList.remove('show');
+            }
+        });
 
         document.querySelectorAll('.number-selector').forEach(selector => {
             const buttons = selector.querySelectorAll('.number-btn');
@@ -2636,15 +2647,18 @@
                                 .from('studio-photos')
                                 .getPublicUrl(fileName);
                             
+                            // FIXED: Insert with correct schema
                             await supabaseClient
                                 .from('studio_photos')
                                 .insert({
                                     studio_id: userTierData.studio_id,
-                                    storage_path: fileName,
-                                    storage_url: urlData.publicUrl,
-                                    instructor_emails: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
+                                    photo_url: urlData.publicUrl,
+                                    file_name: photo.file.name,
+                                    file_size: photo.file.size,
+                                    tags: photo.taggedInstructors.length > 0 ? photo.taggedInstructors : null,
                                     keywords: photo.keywords || null,
-                                    uploaded_by: userTierData.email
+                                    uploaded_by: userTierData.email,
+                                    is_active: true
                                 });
                             
                             photoResults.push({
