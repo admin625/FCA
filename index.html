@@ -2736,14 +2736,28 @@
             document.getElementById('submit-btn').disabled = true;
             
             try {
-                await fetch('https://n8n.fiorsaoirse.com/webhook/fca-content-images', {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+             // BRANCHING LOGIC: Route to different workflows based on user type
+let webhookUrl;
+
+if (userTierData.role === 'studio_owner' || userTierData.role === 'studio_instructor') {
+    // PREMIUM STUDIO AGENT (new workflow with posting times, engagement goals, etc.)
+    webhookUrl = 'https://jmac.app.n8n.cloud/webhook/fca-studio-agent';
+} else {
+    // REGULAR CLIENT AGENT (existing simple workflow)
+    webhookUrl = 'https://n8n.fiorsaoirse.com/webhook/fca-content-images';
+}
+
+console.log(`Routing ${userTierData.role} to: ${webhookUrl}`);  // ← FIXED: Added opening (
+
+// Submit to the appropriate workflow
+await fetch(webhookUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+});
                 
                 document.getElementById('loading-overlay').classList.remove('show');
                 
