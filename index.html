@@ -1995,11 +1995,11 @@
             let role = 'regular_client';
             let tierData = {};
             
-            const { data: clientData } = await supabaseClient
-                .from('clients')
-                .select('*')
-                .eq('email', email)
-                .single();
+            const { data: clientData, error: clientError } = await supabaseClient
+       .from('clients')
+       .select('*')
+       .eq('email', email)
+       .maybeSingle();
 
             if (!clientData) {
                 tierInfo.className = 'tier-info expired show';
