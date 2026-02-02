@@ -1219,7 +1219,6 @@
                         Upload 5-20 photos. Add keywords like "headshot alex" or "yoga sara" for easy searching.
                     </div>
 
-                    <!-- Save to Library Button -->
                     <button 
                         type="button" 
                         id="save-photos-btn" 
@@ -1416,7 +1415,7 @@
                                     <div class="number-btn" data-value="2">2</div>
                                     <div class="number-btn" data-value="3">3</div>
                                     <div class="number-btn" data-value="4">4</div>
-                                    <div class="number-btn" selected" data-value="5">5</div>
+                                    <div class="number-btn selected" data-value="5">5</div>
                                 </div>
                                 <input type="hidden" name="twitter_posts" value="5">
                             </div>
@@ -1494,6 +1493,7 @@
         let studioInstructors = [];
         
         const getStorageKey = (email) => `fca_form_data_${email}`;
+        
         function saveFormData(email) {
             if (!email) return;
             
@@ -1714,7 +1714,6 @@
                 let photos = [];
 
                 if (userTierData.role === 'studio_owner') {
-                    // FIXED: Query using correct column name
                     const { data, error } = await supabaseClient
                         .from('studio_photos')
                         .select('*')
@@ -1728,16 +1727,13 @@
 
                 const searchTerms = searchQuery.split(/[\s,]+/).filter(t => t.length > 0);
                 
-                // FIXED: Search in keywords field and tags JSONB array
                 searchedPhotos = photos.filter(photo => {
                     const keywords = (photo.keywords || '').toLowerCase();
-                    const tags = photo.tags || []; // tags is a JSONB array
+                    const tags = photo.tags || [];
                     
                     return searchTerms.some(term => {
-                        // Search in keywords
                         if (keywords.includes(term)) return true;
                         
-                        // Search in tags array (instructor emails)
                         if (Array.isArray(tags)) {
                             return tags.some(tag => 
                                 typeof tag === 'string' && tag.toLowerCase().includes(term)
@@ -1778,7 +1774,7 @@
                 const isSelected = selectedPhotos.some(p => p.photo_id === photoId);
 
                 const keywords = photo.keywords || '';
-                const tags = photo.tags || []; // JSONB array
+                const tags = photo.tags || [];
                 const allTags = [...keywords.split(',').map(k => k.trim()).filter(k => k), ...tags].join(', ');
 
                 return `
@@ -1858,7 +1854,7 @@
                 if (!selectedPhoto) {
                     selectedPhoto = {
                         photo_id: photoId,
-                        photo_url: photo.photo_url, // FIXED: Use photo_url
+                        photo_url: photo.photo_url,
                         platforms: {}
                     };
                     selectedPhotos.push(selectedPhoto);
@@ -1991,47 +1987,37 @@
                 verifyEmailBtn.click();
             }
         });
-        async function checkUserTier(email) {
-            let role = 'regular_client';
-            let tierData = {};
-            
-            const { data: clientData, error: clientError } = await supabaseClient
-       .from('clients')
-       .select('*')
-       .eq('email', email)
-       .maybeSingle();
 
-            if (!clientData) {
-                tierInfo.className = 'tier-info expired show';
-                tierInfo.innerHTML = `
-                    <h3>🆕 New User?</h3>
-                    <p>We couldn't find an account with this email.</p>
-                    <p style="margin-top: 10px;"><a href="https://fca-signup.netlify.app" style="color: #0369a1; font-weight: 600;">Start Free Trial →</a></p>
-                `;
-                return;
-            }
+        async function checkUserTier(email) {
+            // Step 1: Check clients table (for universal client_id)
+            const { data: clientData, error: clientError } = await supabaseClient
+                .from('clients')
+                .select('*')
+                .eq('email', email)
+                .maybeSingle();
             
-            const universalClientId = clientData.id;
+            const universalClientId = clientData ? clientData.id : null;
             
-          const { data: studioOwnerData, error: studioError } = await supabaseClient
-    .from('studio_accounts')
-    .select('*')
-    .eq('owner_email', email)
-    .eq('subscription_status', 'active')
-    .maybeSingle();
+            // Step 2: Check if they're a studio owner
+            const { data: studioOwnerData, error: studioError } = await supabaseClient
+                .from('studio_accounts')
+                .select('*')
+                .eq('owner_email', email)
+                .eq('subscription_status', 'active')
+                .maybeSingle();
 
             if (studioOwnerData) {
-               const { data: instructorsData, error: instructorsError } = await supabaseClient
-    .from('studio_instructors')
-    .select('*')
-    .eq('studio_id', studioOwnerData.id)
-    .eq('status', 'active');
+                const { data: instructorsData, error: instructorsError } = await supabaseClient
+                    .from('studio_instructors')
+                    .select('*')
+                    .eq('studio_id', studioOwnerData.id)
+                    .eq('status', 'active');
 
-if (instructorsError) {
-    console.error('Error loading instructors:', instructorsError);
-}
+                if (instructorsError) {
+                    console.error('Error loading instructors:', instructorsError);
+                }
 
-studioInstructors = instructorsData || [];
+                studioInstructors = instructorsData || [];
                 
                 userTierData = {
                     tier: studioOwnerData.plan_type || 'pro',
@@ -2052,7 +2038,7 @@ studioInstructors = instructorsData || [];
                     ${hasSavedData ? '<p style="margin-top: 8px; font-size: 12px; color: #0369a1;">📝 Loaded your previous settings</p>' : ''}
                 `;
 
-                document.getElementById('client_id').value = userTierData.client_id;
+                document.getElementById('client_id').value = userTierData.client_id || '';
                 document.getElementById('user_tier').value = userTierData.tier;
                 document.getElementById('user_role').value = 'studio_owner';
                 document.getElementById('studio_id').value = userTierData.studio_id;
@@ -2068,11 +2054,12 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
-           const { data: trialData, error: trialError } = await supabaseClient
-    .from('trials')
-    .select('*')
-    .eq('email', email)
-    .maybeSingle();
+            // Step 3: Check if they're in a trial
+            const { data: trialData, error: trialError } = await supabaseClient
+                .from('trials')
+                .select('*')
+                .eq('email', email)
+                .maybeSingle();
 
             if (trialData) {
                 const postsUsed = trialData.content_count || 0;
@@ -2121,7 +2108,7 @@ studioInstructors = instructorsData || [];
                     ${hasSavedData ? '<p style="margin-top: 8px; font-size: 12px; color: #047857;">📝 Loaded your previous settings</p>' : ''}
                 `;
 
-                document.getElementById('client_id').value = userTierData.client_id;
+                document.getElementById('client_id').value = userTierData.client_id || '';
                 document.getElementById('user_tier').value = 'trial';
                 document.getElementById('user_role').value = 'trial_user';
                 document.getElementById('posts_remaining').value = postsRemaining;
@@ -2134,12 +2121,13 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
-           const { data: instructorData, error: instructorError } = await supabaseClient
-    .from('studio_instructors')
-    .select('*, studio_accounts(*)')
-    .eq('instructor_email', email)
-    .eq('status', 'active')
-    .maybeSingle();
+            // Step 4: Check if they're a studio instructor
+            const { data: instructorData, error: instructorError } = await supabaseClient
+                .from('studio_instructors')
+                .select('*, studio_accounts(*)')
+                .eq('instructor_email', email)
+                .eq('status', 'active')
+                .maybeSingle();
 
             if (instructorData) {
                 userTierData = {
@@ -2161,7 +2149,7 @@ studioInstructors = instructorsData || [];
                     ${hasSavedData ? '<p style="margin-top: 8px; font-size: 12px; color: #0369a1;">📝 Loaded your previous settings</p>' : ''}
                 `;
 
-                document.getElementById('client_id').value = userTierData.client_id;
+                document.getElementById('client_id').value = userTierData.client_id || '';
                 document.getElementById('user_tier').value = 'studio_instructor';
                 document.getElementById('user_role').value = 'studio_instructor';
                 document.getElementById('studio_id').value = userTierData.studio_id;
@@ -2175,7 +2163,8 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
-            if (clientData.subscription_status === 'active') {
+            // Step 5: Check if they're a regular paying client
+            if (clientData && clientData.subscription_status === 'active') {
                 const tier = clientData.plan_type || 'basic';
                 
                 userTierData = {
@@ -2220,10 +2209,12 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
+            // Step 6: Not found anywhere - truly a new user
             tierInfo.className = 'tier-info expired show';
             tierInfo.innerHTML = `
-                <h3>⚠️ Account Issue</h3>
-                <p>Your account exists but is not active. Please contact support.</p>
+                <h3>🆕 New User?</h3>
+                <p>We couldn't find an account with this email.</p>
+                <p style="margin-top: 10px;"><a href="https://fca-signup.netlify.app" style="color: #0369a1; font-weight: 600;">Start Free Trial →</a></p>
             `;
         }
 
@@ -2431,7 +2422,6 @@ studioInstructors = instructorsData || [];
             renderPhotoPreview();
         };
 
-        // FIXED: Save photos to library with correct schema
         document.getElementById('save-photos-btn').addEventListener('click', async function() {
             if (!userTierData) {
                 alert('Please verify your email first');
@@ -2455,7 +2445,6 @@ studioInstructors = instructorsData || [];
                 
                 for (const photo of uploadedPhotos) {
                     if (userTierData.role === 'studio_owner') {
-                        // Upload to studio-photos bucket
                         const fileName = `studio-${userTierData.studio_id}/${Date.now()}-${photo.file.name}`;
                         const { data, error } = await supabaseClient.storage
                             .from('studio-photos')
@@ -2467,7 +2456,6 @@ studioInstructors = instructorsData || [];
                             .from('studio-photos')
                             .getPublicUrl(fileName);
                         
-                        // FIXED: Insert with correct schema columns
                         const { error: insertError } = await supabaseClient
                             .from('studio_photos')
                             .insert({
@@ -2490,7 +2478,6 @@ studioInstructors = instructorsData || [];
                         });
                         
                     } else if (userTierData.role === 'regular_client' || userTierData.role === 'trial_user') {
-                        // Upload to client-photos bucket
                         const fileName = `${userTierData.email}/${Date.now()}-${photo.file.name}`;
                         const { data, error } = await supabaseClient.storage
                             .from('client-photos')
@@ -2509,21 +2496,17 @@ studioInstructors = instructorsData || [];
                     }
                 }
                 
-                // Success!
                 const successMsg = document.getElementById('save-photos-success');
                 successMsg.textContent = `✅ ${photoResults.length} photo${photoResults.length === 1 ? '' : 's'} saved to library!`;
                 successMsg.style.display = 'block';
                 
-                // Clear uploaded photos
                 uploadedPhotos = [];
                 renderPhotoPreview();
                 
-                // Hide success message after 5 seconds
                 setTimeout(() => {
                     successMsg.style.display = 'none';
                 }, 5000);
                 
-                // Re-enable button
                 saveBtn.disabled = false;
                 saveBtn.textContent = originalText;
                 
@@ -2531,7 +2514,6 @@ studioInstructors = instructorsData || [];
                 console.error('Photo save error:', error);
                 alert('Error saving photos: ' + error.message);
                 
-                // Re-enable button on error
                 saveBtn.disabled = false;
                 saveBtn.textContent = originalText;
             } finally {
@@ -2651,7 +2633,6 @@ studioInstructors = instructorsData || [];
                                 .from('studio-photos')
                                 .getPublicUrl(fileName);
                             
-                            // FIXED: Insert with correct schema
                             await supabaseClient
                                 .from('studio_photos')
                                 .insert({
@@ -2740,28 +2721,24 @@ studioInstructors = instructorsData || [];
             document.getElementById('submit-btn').disabled = true;
             
             try {
-             // BRANCHING LOGIC: Route to different workflows based on user type
-let webhookUrl;
+                let webhookUrl;
 
-if (userTierData.role === 'studio_owner' || userTierData.role === 'studio_instructor') {
-    // PREMIUM STUDIO AGENT (new workflow with posting times, engagement goals, etc.)
-    webhookUrl = 'https://jmac.app.n8n.cloud/webhook/fca-studio-agent';
-} else {
-    // REGULAR CLIENT AGENT (existing simple workflow)
-    webhookUrl = 'https://n8n.fiorsaoirse.com/webhook/fca-content-images';
-}
+                if (userTierData.role === 'studio_owner' || userTierData.role === 'studio_instructor') {
+                    webhookUrl = 'https://jmac.app.n8n.cloud/webhook/fca-studio-agent';
+                } else {
+                    webhookUrl = 'https://n8n.fiorsaoirse.com/webhook/fca-content-images';
+                }
 
-console.log(`Routing ${userTierData.role} to: ${webhookUrl}`);  // ← FIXED: Added opening (
+                console.log(`Routing ${userTierData.role} to: ${webhookUrl}`);
 
-// Submit to the appropriate workflow
-await fetch(webhookUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-});
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
                 
                 document.getElementById('loading-overlay').classList.remove('show');
                 
