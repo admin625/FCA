@@ -2121,23 +2121,30 @@
                 return;
             }
 
-            // Step 4: Check if they're a studio instructor
-            const { data: instructorData, error: instructorError } = await supabaseClient
-                .from('studio_instructors')
-                .select('*, studio_accounts(*)')
-                .eq('instructor_email', email)
-                .eq('status', 'active')
-                .maybeSingle();
+           // Step 4: Check if they're a studio instructor
+console.log('🔍 Checking studio_instructors for:', email);
 
-            if (instructorData) {
-                userTierData = {
-                    tier: 'studio_instructor',
-                    role: 'studio_instructor',
-                    email: email,
-                    client_id: universalClientId,
-                    studio_id: instructorData.studio_id,
-                    studio_name: instructorData.studio_accounts.studio_name
-                };
+const { data: instructorData, error: instructorError } = await supabaseClient
+    .from('studio_instructors')
+    .select('*, studio_accounts(*)')
+    .eq('instructor_email', email)
+    .eq('status', 'active')
+    .maybeSingle();
+
+console.log('👥 Instructor data:', instructorData);
+console.log('❌ Instructor error:', instructorError);
+
+if (instructorData) {
+    console.log('✅ Found as studio instructor!');
+    
+    userTierData = {
+        tier: 'studio_instructor',
+        role: 'studio_instructor',
+        email: email,
+        client_id: universalClientId,
+        studio_id: instructorData.studio_id,
+        studio_name: instructorData.studio_accounts.studio_name
+    };
 
                 const hasSavedData = loadFormData(email);
 
