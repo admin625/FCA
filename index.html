@@ -2013,12 +2013,12 @@
             
             const universalClientId = clientData.id;
             
-            const { data: studioOwnerData } = await supabaseClient
-                .from('studio_accounts')
-                .select('*')
-                .eq('owner_email', email)
-                .eq('subscription_status', 'active')
-                .single();
+          const { data: studioOwnerData, error: studioError } = await supabaseClient
+    .from('studio_accounts')
+    .select('*')
+    .eq('owner_email', email)
+    .eq('subscription_status', 'active')
+    .maybeSingle();
 
             if (studioOwnerData) {
                const { data: instructorsData, error: instructorsError } = await supabaseClient
@@ -2068,11 +2068,11 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
-            const { data: trialData } = await supabaseClient
-                .from('trials')
-                .select('*')
-                .eq('email', email)
-                .single();
+           const { data: trialData, error: trialError } = await supabaseClient
+    .from('trials')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
 
             if (trialData) {
                 const postsUsed = trialData.content_count || 0;
@@ -2134,12 +2134,12 @@ studioInstructors = instructorsData || [];
                 return;
             }
 
-            const { data: instructorData } = await supabaseClient
-                .from('studio_instructors')
-                .select('*, studio_accounts(*)')
-                .eq('instructor_email', email)
-                .eq('status', 'active')
-                .single();
+           const { data: instructorData, error: instructorError } = await supabaseClient
+    .from('studio_instructors')
+    .select('*, studio_accounts(*)')
+    .eq('instructor_email', email)
+    .eq('status', 'active')
+    .maybeSingle();
 
             if (instructorData) {
                 userTierData = {
