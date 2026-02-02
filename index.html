@@ -2021,14 +2021,17 @@
                 .single();
 
             if (studioOwnerData) {
-                const { data: instructorData, error: instructorError } = await supabaseClient
+               const { data: instructorsData, error: instructorsError } = await supabaseClient
     .from('studio_instructors')
-    .select('*, studio_accounts(*)')
-    .eq('instructor_email', email)
-    .eq('status', 'active')
-    .maybeSingle();
+    .select('*')
+    .eq('studio_id', studioOwnerData.id)
+    .eq('status', 'active');
 
-                studioInstructors = instructorsData || [];
+if (instructorsError) {
+    console.error('Error loading instructors:', instructorsError);
+}
+
+studioInstructors = instructorsData || [];
                 
                 userTierData = {
                     tier: studioOwnerData.plan_type || 'pro',
