@@ -2021,11 +2021,12 @@
                 .single();
 
             if (studioOwnerData) {
-                const { data: instructorsData } = await supabaseClient
-                    .from('studio_instructors')
-                    .select('*')
-                    .eq('studio_id', studioOwnerData.id)
-                    .eq('status', 'active');
+                const { data: instructorData, error: instructorError } = await supabaseClient
+    .from('studio_instructors')
+    .select('*, studio_accounts(*)')
+    .eq('instructor_email', email)
+    .eq('status', 'active')
+    .maybeSingle();
 
                 studioInstructors = instructorsData || [];
                 
