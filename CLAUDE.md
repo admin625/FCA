@@ -4,8 +4,11 @@
 FCA is an AI-powered social media content platform for fitness studios. It generates captions, images, and video reels tailored to each studio's brand, instructors, and schedule.
 
 ## Pricing
-- **Base plan:** $400/month
-- **Instructor seats:** $60/month per instructor
+FCA Studio is $599/mo standard, with quarterly ($1,617/3mo, ~10% savings) and annual ($5,750/yr, ~20% savings) commitment options.
+
+The first 100 founding studios pay $299/mo, locked in for life — quarterly $807/3mo and annual $2,870/yr also available at founding rates. Founding pricing is automatic at signup based on availability; no coupon code required.
+
+**Note:** $299/$599 is all-in pricing per HQ — no per-seat add-on. Instructor seats are included. Founding cohort gating is server-side via the `claim_founder_slot` RPC, not a coupon code.
 
 ## Launch Status
 - Launched March 2026
@@ -76,3 +79,6 @@ Customer acquisition and lead generation. The trial system and attribution loop 
 - **Always check views before querying raw tables** for reporting — the views are pre-built for attribution and performance data
 - **The Stripe webhook workflow ID is `q7IuW7Q85mpgOYub`** — reference by ID, do not recreate
 - Signup URL is `https://studio-dash.netlify.app/signup`
+
+## Repo Activity Note (2026-05-05)
+This `admin625/FCA` repo last received commits on 2026-03-19 (~7 weeks ago). Active development has shifted to `admin625/studio-dashboard` (current dashboard) and `admin625/fca-leadgen` (acquisition pipeline). Treat this repo as historical reference for the early-2026 launch state.
