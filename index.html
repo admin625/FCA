@@ -2731,7 +2731,8 @@ if (instructorData) {
                 let webhookUrl;
 
                 if (userTierData.role === 'studio_owner' || userTierData.role === 'studio_instructor') {
-                    webhookUrl = 'https://jmac.app.n8n.cloud/webhook/fca-studio-agent';
+                    // TEST WEBHOOK - points to photo swap test workflow
+                    webhookUrl = 'https://jmac.app.n8n.cloud/webhook/fca-studio-agent-test';
                 } else {
                     webhookUrl = 'https://n8n.fiorsaoirse.com/webhook/fca-content-images';
                 }
